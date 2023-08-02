@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:login/model/user.dart';
+import 'landing.dart';
 import 'view/Home page/home.dart';
 import 'view/login page/login.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  
+  runApp(MultiProvider(
+    
+    providers: [
+      ChangeNotifierProvider(create: (_)=> User())
+    ],
+    
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,15 +26,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         colorScheme: ThemeData().colorScheme.copyWith(
-        primary: Colors.green,
-        ),
+              primary: Colors.green,
+            ),
       ),
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
       routes: {
+        '/': (context) => const Landing(),
         '/login': (context) => const LoginPage(),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => const HomePage(title: 'home'),
       },
-      );
+    );
   }
 }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:login/api/api.dart';
-import 'package:login/api/api_error.dart';
-import 'package:login/api/api_response.dart';
-import 'package:login/view/Home%20page/home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:login/model/api_response.dart';
+import 'package:login/view/Home page/home.dart';
 import 'text_field_login.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,32 +18,53 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController emailController = TextEditingController();
 
-  void Submitted() async {
-    
+  void submitted() async {
     final FormState? form = _formKey.currentState;
+    final BuildContext context = this.context;
+
     if (!form!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fix the errors in red before submitting.')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please fix the errors in red before submitting.')));
     } else {
+
       form.save();
-      apiResponse = await authenticateUser(emailController.text, passwordController.text);
-      if ((apiResponse.ApiError as ApiError) == null) {
-        _saveAndRedirectToHome();
+  
+      bool isSuccessful = await authenticateUser(
+        emailController.text.trim(),
+        passwordController.text.trim(),
+      );
+      //user1@gmail.com
+      //12345678
+      // print(response.isSuccessful);
+      if (isSuccessful) {
+        Navigator.pushAndRemoveUntil<void>(
+          context,
+          MaterialPageRoute<void>(
+              builder: (BuildContext context) => const HomePage(title: 'home')),
+          ModalRoute.withName('/home'),
+        );
       } else {
-       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text((apiResponse.ApiError as ApiError).error)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                'Login failed. Please check your credentials and try again.')));
       }
     }
+    
   }
 
-  void _saveAndRedirectToHome() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    
-    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
-  }
+  // void _saveAndRedirectToHome() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  //   Navigator.pushNamedAndRemoveUntil(
+  //       context, '/home', ModalRoute.withName('/home'),
+  //       arguments: (apiResponse.Data as User));
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 211, 241, 212),
         title: Image.asset(
           'assets/iraq.png',
@@ -68,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     TextFieldLogIn(
                       text: 'Email',
-                      icon: Icon(Icons.email_rounded),
+                      icon: const Icon(Icons.email_rounded),
                       obscureText: false,
                       controller: emailController,
                     ),
@@ -80,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),*/
                     TextFieldLogIn(
                       text: 'Password',
-                      icon: Icon(Icons.password_rounded),
+                      icon: const Icon(Icons.password_rounded),
                       obscureText: true,
                       controller: passwordController,
                     ),
@@ -90,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                     ClipRRect(
                       borderRadius: const BorderRadius.all(Radius.circular(8)),
                       child: ElevatedButton.icon(
-                        onPressed: Submitted,
+                        onPressed: submitted,
                         icon: const Icon(Icons.login_sharp),
                         label: const Text('LogIn'),
                         style: ButtonStyle(
